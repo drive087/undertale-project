@@ -33,7 +33,14 @@ module BorderSprite(
     
     always @(posedge Pclk)
         begin
-            if (((xx>195 && xx<445) && (yy>195 && yy<201))||((xx>195 && xx<445) && (yy>439 && yy<445))||((xx>195 && xx<201) && (yy>195 && yy<439))||((xx>439 && xx<445) && (yy>195 && yy<439)))
+            if (((xx>215 && xx<425) && (yy>195 && yy<201))||((xx>215 && xx<425) && (yy>389 && yy<395))||((xx>211 && xx<217) && (yy>195 && yy<399))||((xx>425 && xx<431) && (yy>195 && yy<399)))
+                begin
+                BorderSpriteOn <= 1;
+                end
+                
+              
+            else
+            if(((xx-200)**2 + (yy-200)**2 - 225)**3 - ( 15 *(xx-200)**2) * ((yy-200)**3) <= 0)
                 begin
                 BorderSpriteOn <= 1;
                 end

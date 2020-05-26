@@ -30,9 +30,15 @@ module Top(
     wire [9:0] y;           // pixel y position: 10-bit value: 0-1023 : only need 525
     wire active;            // high during active pixel drawing
     wire PixCLK;            // 25MHz pixel clock
+    wire state_game;
+    wire attack;
+    wire damage;
+    
     vga640x480 display (.i_clk(CLK),.i_rst(rst),.o_hsync(HSYNC), 
                         .o_vsync(VSYNC),.o_x(x),.o_y(y),.o_active(active),
                         .pix_clk(PixCLK));
+                        
+    timer_state timer (.i_clk(PixCLK),.o_state_game(state_game));
                         
     uart_echo uart(.Pclk(PixCLK),.RESET(rst),.RX(RsRx),.TX(RsTx),.state(state));
 
@@ -50,6 +56,17 @@ module Top(
                           
     BulletSprite BulletDisplay (.xx(x),.yy(y),.aactive(active),
                           .BulletSpriteOn(BulletSpriteOn),.Pclk(PixCLK));
+    BulletSprite2 BulletDisplay2 (.xx(x),.yy(y),.aactive(active),
+                          .BulletSpriteOn2(BulletSpriteOn2),.Pclk(PixCLK));
+                          
+    pangya_tab pangya_tab (.xx(x),.yy(y),.aactive(active),
+                          .pangyatabOn(pangyatabOn), .pangyatab_color(pangyatab_color),.Pclk(PixCLK));
+                          
+    pangya_tab2 pangya_tab2 (.xx(x),.yy(y),.aactive(active),
+                          .pangyatabOn2(pangyatabOn2),.Pclk(PixCLK),.state(state));
+                          
+    hp_bar hp_bar(.xx(x),.yy(y),.aactive(active),
+                          .hp_barOn(hp_barOn),.Pclk(PixCLK));
                           
     // instantiate AlienSprites code
     wire Alien1SpriteOn;    // 1=on, 0=off
@@ -58,6 +75,7 @@ module Top(
     wire [7:0] A1dout;      // pixel value from Alien1.mem
     wire [7:0] A2dout;      // pixel value from Alien2.mem
     wire [7:0] A3dout;      // pixel value from Alien3.mem
+    wire [11:0] pangyatab_color;
     AlienSprites ADisplay (.xx(x),.yy(y),.aactive(active),
                           .A1SpriteOn(Alien1SpriteOn),.A2SpriteOn(Alien2SpriteOn),
                           .A3SpriteOn(Alien3SpriteOn),.A1dataout(A1dout),
@@ -81,6 +99,7 @@ module Top(
   
     // load colour palette
     reg [7:0] palette [0:191];  // 8 bit values from the 192 hex entries in the colour palette
+    reg [10:0] palette_foam2 [0:1223];
     reg [7:0] COL = 0;          // background colour palette value
     initial begin
         $readmemh("pal24bit.mem", palette); // load 192 hex values into "palette"
@@ -89,6 +108,9 @@ module Top(
     // draw on the active area of the screen
     always @ (posedge PixCLK)
     begin
+        
+        if(state_game==0)
+        begin
         if (active)
             begin
                 if (BeeSpriteOn==1)
@@ -159,10 +181,17 @@ module Top(
                       RED<=4'b1111;  
                       GREEN <=4'b1111;
                       BLUE <= 4'b1111;
-                    end                            
+                    end 
+                else
+                if (BulletSpriteOn2==1) 
+                    begin              
+                      RED<=4'b1111;  
+                      GREEN <=4'b1111;
+                      BLUE <= 4'b1111;
+                    end                              
                 else
                   begin
-                       RED <= (palette[(COL*3)])>>4;           // RED bits(7:4) from colour palette
+                      RED <= (palette[(COL*3)])>>4;           // RED bits(7:4) from colour palette
                       GREEN <= (palette[(COL*3)+1])>>4;       // GREEN bits(7:4) from colour palette
                       BLUE <= (palette[(COL*3)+2])>>4;        // BLUE bits(7:4) from colour palette
                  end
@@ -173,5 +202,39 @@ module Top(
                     GREEN <= 0; // to "0" when x,y outside of
                     BLUE <= 0;  // the active display area
                 end
+         end
+         else
+         if(state_game==1)
+         begin
+         if (active)
+            begin
+                if (pangyatabOn2==1)
+                    begin
+                        RED <= 4'b1111;          // RED bits(7:4) from colour palette
+                        GREEN <= 4'b1111;      // GREEN bits(7:4) from colour palette
+                        BLUE <= 4'b1111;       // BLUE bits(7:4) from colour palette
+                    end 
+                else
+                if (pangyatabOn==1)
+                    begin
+                        RED <= pangyatab_color [11:8];          // RED bits(7:4) from colour palette
+                        GREEN <= pangyatab_color [7:4];      // GREEN bits(7:4) from colour palette
+                        BLUE <= pangyatab_color [3:0];       // BLUE bits(7:4) from colour palette
+                    end 
+       
+                else
+                  begin
+                      RED <= (palette[(COL*3)])>>4;           // RED bits(7:4) from colour palette
+                      GREEN <= (palette[(COL*3)+1])>>4;       // GREEN bits(7:4) from colour palette
+                      BLUE <= (palette[(COL*3)+2])>>4;        // BLUE bits(7:4) from colour palette
+                 end                       
+            end
+        else
+                begin
+                    RED <= 0;   // set RED, GREEN & BLUE
+                    GREEN <= 0; // to "0" when x,y outside of
+                    BLUE <= 0;  // the active display area
+                end
+         end       
     end
 endmodule
