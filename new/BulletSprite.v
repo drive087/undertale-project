@@ -28,7 +28,7 @@ module BulletSprite(
     //output reg [3:0] RED, // 8 bit pixel value from Bee.mem
     //output reg [3:0] GREEN, // 8 bit pixel value from Bee.mem
     //output reg [3:0] BLUE, // 8 bit pixel value from Bee.mem
-    
+    input wire isCollisionB1,
     input wire Pclk // 25MHz pixel clock
 
     );
@@ -42,6 +42,11 @@ module BulletSprite(
     
     always @(posedge Pclk)
         begin
+            if(isCollisionB1 == 1)
+            begin
+                BulletSpriteOn <= 0;
+            end
+            else
             if (((xx-B1X)**2 + (yy-B1Y)**2) <= 25)
                 begin
                 BulletSpriteOn <= 1;

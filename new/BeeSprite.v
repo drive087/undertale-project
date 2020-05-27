@@ -18,6 +18,7 @@ module BeeSprite(
     input wire BD, // left button
     input wire Pclk, // 25MHz pixel clock
     input wire [2:0] state
+    
     );
 
     // instantiate BeeRom code

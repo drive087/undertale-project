@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 05/26/2020 09:20:30 PM
+// Create Date: 05/27/2020 12:47:00 PM
 // Design Name: 
-// Module Name: hp_bar
+// Module Name: hp_monster_bar
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,35 +20,34 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module hp_bar(
+module hp_monster_bar(
+    
     input wire [9:0] xx, // current x position
     input wire [9:0] yy, // current y position
     input wire aactive, // high during active pixel drawing
+    input wire [6:0] pangya_damage,
     //input wire damage,
-    output reg hp_barOn, // 1=on, 0=off
-    input wire isCollisionB1,
-    input wire isCollisionB2,
+    output reg hp_monster_barOn, // 1=on, 0=off
+    input wire attack,
     input wire Pclk // 25MHz pixel clock
     );
-    reg [6:0] stack_damage =0;
+    reg [9:0] stack_damage  = 0;
     
     always @(posedge Pclk)
         begin
-            if (((xx>50 && xx<200-stack_damage) && (yy>400 && yy<410)))
+            if(attack == 1)
+            begin
+            
+            stack_damage = stack_damage+pangya_damage;
+            end
+            
+            if (((xx>50 && xx<200-stack_damage) && (yy>420 && yy<430)))
                 begin
-                hp_barOn <= 1;
+                hp_monster_barOn <= 1;
                 end
             else
                 begin
-                hp_barOn <= 0;
+                hp_monster_barOn <= 0;
                 end
-        end
-        
-    always @(posedge Pclk)
-        begin
-            if(isCollisionB1==1 || isCollisionB2==1)
-            begin
-                stack_damage = stack_damage + 30;
-            end
         end
 endmodule

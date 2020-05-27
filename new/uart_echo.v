@@ -75,8 +75,8 @@ module uart_echo (/*AUTOARG*/
     reg [2:0] last_color;
     initial 
     begin
-    last_color = STATE_BLACK;
-    state = STATE_BLACK;
+    last_color = STATE_YELLOW;
+    state = STATE_YELLOW;
     end
 
    //---------------------------------------------------------------------------
@@ -140,7 +140,7 @@ module uart_echo (/*AUTOARG*/
            tx_byte <= 8'h00;
            transmit <= 1'b0;
            rx_fifo_pop <= 1'b0;
-           state = last_color;
+           state = STATE_YELLOW;
         end
      end // else: !if(RESET)
 

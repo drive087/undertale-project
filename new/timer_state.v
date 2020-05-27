@@ -22,7 +22,7 @@
 
 module timer_state(
     input wire i_clk,      // 100MHz onboard clock
-//    input wire attack,
+    input wire attack,
     output reg o_state_game      // 25MHz pixel clock
     );
     
@@ -32,15 +32,14 @@ module timer_state(
     always @ (posedge i_clk)
         begin
             counter = counter +1;
-            if(counter == 125000000 && o_state_game == 0)
+            if(counter > 125000000 && o_state_game == 0)
                 begin
                 o_state_game = 1;
-                counter <= 0;
                 end
             else
-            if(counter == 125000000 && o_state_game == 1)
+            if(attack==1 && o_state_game == 1)
                 begin
-                counter <= 0;
+                counter = 0;
                 o_state_game = 0;
                 end
             

@@ -32,13 +32,17 @@ module Top(
     wire PixCLK;            // 25MHz pixel clock
     wire state_game;
     wire attack;
-    wire damage;
+    wire [6:0] pangya_damage;
+    reg collision_onceB1 = 0;
+    reg collision_onceB2 = 0;
+    reg isCollisionB1 = 0;
+    reg isCollisionB2 = 0;
     
     vga640x480 display (.i_clk(CLK),.i_rst(rst),.o_hsync(HSYNC), 
                         .o_vsync(VSYNC),.o_x(x),.o_y(y),.o_active(active),
                         .pix_clk(PixCLK));
                         
-    timer_state timer (.i_clk(PixCLK),.o_state_game(state_game));
+    timer_state timer (.i_clk(PixCLK),.attack(attack),.o_state_game(state_game));
                         
     uart_echo uart(.Pclk(PixCLK),.RESET(rst),.RX(RsRx),.TX(RsTx),.state(state));
 
@@ -51,22 +55,26 @@ module Top(
                           .BSpriteOn(BeeSpriteOn),.dataout(dout),.BR(btnR),
                           .BL(btnL),.BU(btnU),.BD(btnD),.Pclk(PixCLK),.state(state));
                           
+    
     BorderSprite BorderDisplay (.xx(x),.yy(y),.aactive(active),
                           .BorderSpriteOn(BorderSpriteOn),.Pclk(PixCLK));
                           
     BulletSprite BulletDisplay (.xx(x),.yy(y),.aactive(active),
-                          .BulletSpriteOn(BulletSpriteOn),.Pclk(PixCLK));
+                          .BulletSpriteOn(BulletSpriteOn),.isCollisionB1(isCollisionB1),.Pclk(PixCLK));
     BulletSprite2 BulletDisplay2 (.xx(x),.yy(y),.aactive(active),
-                          .BulletSpriteOn2(BulletSpriteOn2),.Pclk(PixCLK));
+                          .BulletSpriteOn2(BulletSpriteOn2),.isCollisionB2(isCollisionB2),.Pclk(PixCLK));
                           
     pangya_tab pangya_tab (.xx(x),.yy(y),.aactive(active),
                           .pangyatabOn(pangyatabOn), .pangyatab_color(pangyatab_color),.Pclk(PixCLK));
                           
     pangya_tab2 pangya_tab2 (.xx(x),.yy(y),.aactive(active),
-                          .pangyatabOn2(pangyatabOn2),.Pclk(PixCLK),.state(state));
+                          .pangyatabOn2(pangyatabOn2),.Pclk(PixCLK),.attack(attack),.pangya_damage(pangya_damage),.state(state),.state_game(state_game));
                           
     hp_bar hp_bar(.xx(x),.yy(y),.aactive(active),
-                          .hp_barOn(hp_barOn),.Pclk(PixCLK));
+                          .hp_barOn(hp_barOn),.isCollisionB1(isCollisionB1),.isCollisionB2(isCollisionB2),.Pclk(PixCLK));
+                          
+    hp_monster_bar hp_monster_bar(.xx(x),.yy(y),.aactive(active),.pangya_damage(pangya_damage),
+                          .hp_monster_barOn(hp_monster_barOn),.attack(attack),.Pclk(PixCLK));
                           
     // instantiate AlienSprites code
     wire Alien1SpriteOn;    // 1=on, 0=off
@@ -108,7 +116,6 @@ module Top(
     // draw on the active area of the screen
     always @ (posedge PixCLK)
     begin
-        
         if(state_game==0)
         begin
         if (active)
@@ -125,48 +132,6 @@ module Top(
 //                        RED <= (palette[(A1dout*3)])>>4;        // RED bits(7:4) from colour palette
 //                        GREEN <= (palette[(A1dout*3)+1])>>4;    // GREEN bits(7:4) from colour palette
 //                        BLUE <= (palette[(A1dout*3)+2])>>4;     // BLUE bits(7:4) from colour palette
-//                    end
-//                else
-//                if (Alien2SpriteOn==1)
-//                    begin
-//                        RED <= (palette[(A2dout*3)])>>4;        // RED bits(7:4) from colour palette
-//                        GREEN <= (palette[(A2dout*3)+1])>>4;    // GREEN bits(7:4) from colour palette
-//                        BLUE <= (palette[(A2dout*3)+2])>>4;     // BLUE bits(7:4) from colour palette
-//                    end
-//                else
-//                if (Alien3SpriteOn==1)
-//                    begin
-//                        RED <= (palette[(A3dout*3)])>>4;        // RED bits(7:4) from colour palette
-//                        GREEN <= (palette[(A3dout*3)+1])>>4;    // GREEN bits(7:4) from colour palette
-//                        BLUE <= (palette[(A3dout*3)+2])>>4;     // BLUE bits(7:4) from colour palette
-//                    end
-//                else
-//                if (Hive1SpriteOn==1)
-//                    begin
-//                        RED <= (palette[(H1dout*3)])>>4;        // RED bits(7:4) from colour palette
-//                        GREEN <= (palette[(H1dout*3)+1])>>4;    // GREEN bits(7:4) from colour palette
-//                        BLUE <= (palette[(H1dout*3)+2])>>4;     // BLUE bits(7:4) from colour palette
-//                    end
-//                else
-//                if (Hive2SpriteOn==1)
-//                    begin
-//                        RED <= (palette[(H2dout*3)])>>4;        // RED bits(7:4) from colour palette
-//                        GREEN <= (palette[(H2dout*3)+1])>>4;    // GREEN bits(7:4) from colour palette
-//                        BLUE <= (palette[(H2dout*3)+2])>>4;     // BLUE bits(7:4) from colour palette
-//                    end
-//                else
-//                if (Hive3SpriteOn==1)
-//                    begin
-//                        RED <= (palette[(H3dout*3)])>>4;        // RED bits(7:4) from colour palette
-//                        GREEN <= (palette[(H3dout*3)+1])>>4;    // GREEN bits(7:4) from colour palette
-//                        BLUE <= (palette[(H3dout*3)+2])>>4;     // BLUE bits(7:4) from colour palette
-//                    end
-//                else
-//                if (Hive4SpriteOn==1)
-//                    begin
-//                        RED <= (palette[(H4dout*3)])>>4;        // RED bits(7:4) from colour palette
-//                        GREEN <= (palette[(H4dout*3)+1])>>4;    // GREEN bits(7:4) from colour palette
-//                        BLUE <= (palette[(H4dout*3)+2])>>4;     // BLUE bits(7:4) from colour palette
 //                    end
                 else
                 if (BorderSpriteOn==1) 
@@ -188,7 +153,22 @@ module Top(
                       RED<=4'b1111;  
                       GREEN <=4'b1111;
                       BLUE <= 4'b1111;
-                    end                              
+                    end
+                else
+                if (hp_barOn==1)
+                    begin
+                        RED <= 4'b0000;          // RED bits(7:4) from colour palette
+                        GREEN <= 4'b1111;      // GREEN bits(7:4) from colour palette
+                        BLUE <= 4'b0000;       // BLUE bits(7:4) from colour palette
+                    end 
+                else
+                if (hp_monster_barOn==1)
+                    begin
+                        RED <= 4'b1101;          // RED bits(7:4) from colour palette
+                        GREEN <= 4'b1111;      // GREEN bits(7:4) from colour palette
+                        BLUE <= 4'b0000;       // BLUE bits(7:4) from colour palette
+                    end    
+                                           
                 else
                   begin
                       RED <= (palette[(COL*3)])>>4;           // RED bits(7:4) from colour palette
@@ -206,6 +186,10 @@ module Top(
          else
          if(state_game==1)
          begin
+         isCollisionB1 = 0;
+         collision_onceB1 = 0;
+         isCollisionB2 = 0;
+         collision_onceB2 = 0;
          if (active)
             begin
                 if (pangyatabOn2==1)
@@ -221,7 +205,20 @@ module Top(
                         GREEN <= pangyatab_color [7:4];      // GREEN bits(7:4) from colour palette
                         BLUE <= pangyatab_color [3:0];       // BLUE bits(7:4) from colour palette
                     end 
-       
+                else
+                if (hp_barOn==1)
+                    begin
+                        RED <= 4'b0000;          // RED bits(7:4) from colour palette
+                        GREEN <= 4'b1111;      // GREEN bits(7:4) from colour palette
+                        BLUE <= 4'b0000;       // BLUE bits(7:4) from colour palette
+                    end 
+                else
+                if (hp_monster_barOn==1)
+                    begin
+                        RED <= 4'b1101;          // RED bits(7:4) from colour palette
+                        GREEN <= 4'b1111;      // GREEN bits(7:4) from colour palette
+                        BLUE <= 4'b0000;       // BLUE bits(7:4) from colour palette
+                    end   
                 else
                   begin
                       RED <= (palette[(COL*3)])>>4;           // RED bits(7:4) from colour palette
@@ -237,4 +234,22 @@ module Top(
                 end
          end       
     end
+    always @ (posedge PixCLK)
+    begin
+    if(state_game==0)
+    begin
+        if(BeeSpriteOn == 1 && BulletSpriteOn==1 && collision_onceB1==0)
+                begin
+                    isCollisionB1 = 1;
+                    collision_onceB1 = 1;
+                end
+                else
+                if(BeeSpriteOn == 1 && BulletSpriteOn2==1 && collision_onceB2==0)
+                begin
+                    isCollisionB2 = 1;
+                    collision_onceB2 = 1;
+                end
+        end
+    end
+    
 endmodule

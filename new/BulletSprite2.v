@@ -25,6 +25,7 @@ module BulletSprite2(
     input wire [9:0] yy, // current y position
     input wire aactive, // high during active pixel drawing
     output reg BulletSpriteOn2, // 1=on, 0=off
+    input wire isCollisionB2,
     input wire Pclk // 25MHz pixel clock
 
     );
@@ -38,6 +39,11 @@ module BulletSprite2(
     
     always @(posedge Pclk)
         begin
+            if(isCollisionB2 == 1)
+            begin
+                BulletSpriteOn2 <= 0;
+            end
+            else
             if (((xx-B1X)**2 + (yy-B1Y)**2) <= 25)
                 begin
                 BulletSpriteOn2 <= 1;
