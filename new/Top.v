@@ -186,12 +186,9 @@ module Top(
          else
          if(state_game==1)
          begin
-         isCollisionB1 = 0;
-         collision_onceB1 = 0;
-         isCollisionB2 = 0;
-         collision_onceB2 = 0;
          if (active)
             begin
+                
                 if (pangyatabOn2==1)
                     begin
                         RED <= 4'b1111;          // RED bits(7:4) from colour palette
@@ -243,13 +240,23 @@ module Top(
                     isCollisionB1 = 1;
                     collision_onceB1 = 1;
                 end
-                else
-                if(BeeSpriteOn == 1 && BulletSpriteOn2==1 && collision_onceB2==0)
+     
+        
+        if(BeeSpriteOn == 1 && BulletSpriteOn2==1 && collision_onceB2==0)
                 begin
                     isCollisionB2 = 1;
                     collision_onceB2 = 1;
                 end
+  
         end
+    else
+    begin
+        isCollisionB1 = 0;
+        collision_onceB1 = 0;
+        isCollisionB2 = 0;
+        collision_onceB2 = 0;
     end
+    end
+    
     
 endmodule

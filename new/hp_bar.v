@@ -34,6 +34,16 @@ module hp_bar(
     
     always @(posedge Pclk)
         begin
+            if(isCollisionB1==1)
+            begin
+                stack_damage = stack_damage + 30;
+            end
+            
+            if(isCollisionB2==1)
+            begin
+                stack_damage = stack_damage + 30;
+            end
+            
             if (((xx>50 && xx<200-stack_damage) && (yy>400 && yy<410)))
                 begin
                 hp_barOn <= 1;
@@ -43,12 +53,5 @@ module hp_bar(
                 hp_barOn <= 0;
                 end
         end
-        
-    always @(posedge Pclk)
-        begin
-            if(isCollisionB1==1 || isCollisionB2==1)
-            begin
-                stack_damage = stack_damage + 30;
-            end
-        end
+ 
 endmodule
