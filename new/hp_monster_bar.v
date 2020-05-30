@@ -27,12 +27,13 @@ module hp_monster_bar(
     input wire aactive, // high during active pixel drawing
     input wire [6:0] pangya_damage,
     //input wire damage,
+    output reg monster_alive,
     output reg hp_monster_barOn, // 1=on, 0=off
     input wire attack,
     input wire Pclk // 25MHz pixel clock
     );
     reg [9:0] stack_damage  = 0;
-    
+    reg monster_alive = 1;
     always @(posedge Pclk)
         begin
             if(attack == 1)
@@ -49,5 +50,16 @@ module hp_monster_bar(
                 begin
                 hp_monster_barOn <= 0;
                 end
+        end
+    always @(posedge Pclk)
+        begin
+        if(stack_damage >= 150)
+                    begin
+                        monster_alive =0;
+                    end
+        else
+        begin
+            monster_alive =1;
+        end
         end
 endmodule
